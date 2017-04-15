@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -21,6 +22,7 @@ namespace Wpf
     public partial class MainWindow : Window
     {
         private List<string> stopWords;
+        
 
         public MainWindow()
         {
@@ -50,27 +52,45 @@ namespace Wpf
             //wyrazenie regularne na poprawne zdanie
 
             String[] textArray = Query.Text.Split(' ', ',', ':', ';');
+            //wyrazenie regularne na alfanumeric
+            Regex rgx = new Regex(@"^[A-Za-z0-9]+$");
             
             List<string> textList = new List<string>();
-
+            int a = 0;
             foreach (string item in textArray)
             {
-                textList.Add(item);
+                if (rgx.IsMatch(item))
+                {
+                    a++;
+                    textList.Add(item);
+                }
+                
             }
+
+            Query.Text = Convert.ToString(a);
             //textArray.ToList(); nie dziala
-            for (int i = 0;i < textArray.Length;i++)
+            for (int i = 0;i < textList.Count;i++)
             {
                 foreach(String stopWord in stopWords)
                 {
                     
-                    if (String.Equals(textArray[i], stopWord))
+                    if (String.Equals(textList[i], stopWord))
                     {
-                        textList.Remove(textArray[i]);
+                        textList.Remove(textList[i]);
                         
                     }
                 }
             }
+            //The Porter stemming algorithm
 
+            Porter stemer = new Porter();
+
+            for (int i = 0; i < textList.Count; i++)
+            {
+                textList[i] = stemer.stem(textList[i]);
+            }
+
+            //Query.Text = textList[0] + textList[1]+ textList[2];
 
         }
     }
